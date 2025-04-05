@@ -11,8 +11,8 @@ if (env === "development") {
     };
 } else {
     temp = {
-        basePath: "/FYP-ui/config",
-        assetPrefix: "/FYP-ui/config",
+        basePath: "/FYP-ui",
+        assetPrefix: "/FYP-ui",
         output: "export"
     };
 }
