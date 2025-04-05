@@ -13,7 +13,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./load_balancer_frontend
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
@@ -42,7 +44,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           name: 'github-pages'
-          path: ./out
+          path: ./load_balancer_frontend/out
 
   deploy:
     runs-on: ubuntu-latest
