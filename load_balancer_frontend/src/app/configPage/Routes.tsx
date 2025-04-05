@@ -72,7 +72,7 @@ export default function Routes({lb_config}: { lb_config: LBConfigProps }) {
                 <AccordionDetails>
                     {lb_config.lb_config.routes.map((route: IRoute) => (
                         <div key={route.routeId + " " + itr++} className={"p-1"}>
-                            <Accordion className={"border border-gray-300 shadow-xl"}>
+                            <Accordion key={route.routeId + " " + itr++} className={"border border-gray-300 shadow-xl"}>
                                 <AccordionSummary
                                     expandIcon={<ExpandMoreIcon/>}
                                     aria-controls="panel1-content"
