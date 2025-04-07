@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
     HttpTransportType,
     HubConnection,
@@ -11,33 +11,36 @@ type Message = {
     sender: string;
     content: string;
     sentTime: Date;
+    isMessageYours: boolean;
 };
 
 const Chat = () => {
+    const connect = new HubConnectionBuilder()
+        .withUrl("http://localhost:5237/hub", {
+            skipNegotiation: true,
+            transport: HttpTransportType.WebSockets  // force WebSocket transport
+        })
+        .withAutomaticReconnect()
+        .configureLogging(LogLevel.Information)
+        .build();
+
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
-    const [connection, setConnection] = useState<HubConnection | null>(null);
+    const [connection, setConnection] = useState<HubConnection>(connect);
+    const chatContentBoxRef = useRef<HTMLDivElement | null>(null);
+
     useEffect(() => {
-        const connect = new HubConnectionBuilder()
-            .withUrl("http://localhost:5237/hub", {
-                skipNegotiation: true,
-                transport: HttpTransportType.WebSockets  // force WebSocket transport
-            })
-            .withAutomaticReconnect()
-            .configureLogging(LogLevel.Information)
-            .build();
-        setConnection(connect);
-        connect
+        connection
             .start()
             .then(async () => {
-                connect.on("ReceiveMessage", (sender, content, sentTime) => {
-                    setMessages((prev) => [...prev, { sender, content, sentTime }]);
-                    console.log("Received message", sender, content);
+                connection.on("ReceiveMessage", (sender, content, sentTime, isYours) => {
+                    setMessages((prev) => [...prev, { sender, content, sentTime, isMessageYours: isYours }]);
                 });
-                setTimeout(() => {}, 1000);
-                await connect.invoke("RetrieveMessageHistory");
+                connection.on("MessageHistory", (sender) => {
+                    setMessages(sender);
+                });
+                await connection.invoke("RetrieveMessageHistory");
             })
-
             .catch((err) =>
                 console.error("Error while connecting to SignalR Hub:", err)
             );
@@ -48,30 +51,42 @@ const Chat = () => {
             }
         };
     }, []);
+
     const sendMessage = async () => {
         if (connection && newMessage.trim()) {
             await connection.send("PostMessage", newMessage);
             setNewMessage("");
-            await connection.invoke("RetrieveMessageHistory");
         }
     };
+
     const isMyMessage = (username: string) => {
-        return connection && username === connection.connectionId;
-        // return true;
+        return username === connection!.connectionId;
     };
 
+    // Scroll to the bottom when messages change
+    useEffect(() => {
+        const out = chatContentBoxRef.current;
+        if (out) {
+            out.scrollTop = out.scrollHeight;
+        }
+    }, [messages]); // Depend on messages, so it runs when a new message is added
+
     return (
-        <div className="w-screen h-screen flex flex-col justify-center items-center">
-            <div className="mb-4">
+        <div className="w-screen h-screen flex flex-col items-center justify-center">
+            <div
+                className="mb-4 container max-h-2/3 overflow-auto overscroll-y-contain flex flex-col justify-center items-center"
+                id="chatContentBox"
+                ref={chatContentBoxRef}
+            >
                 {messages.map((msg, index) => (
                     <div
                         key={index}
-                        className={`p-2 my-2 rounded ${
-                            isMyMessage(msg.sender) ? "bg-blue-500" : "bg-gray-200"
+                        className={`p-2 my-2 rounded text-black max-w-screen-md w-full overflow-x ${
+                            msg.isMessageYours || isMyMessage(msg.sender) ? "bg-blue-500" : "bg-gray-200"
                         }`}
                     >
-                        <p>{msg.content}</p>
-                        <p className="text-xs">
+                        <p className="break-all text-left">{msg.content}</p>
+                        <p className="text-xs text-right">
                             {new Date(msg.sentTime).toLocaleString()}
                         </p>
                     </div>
@@ -82,6 +97,7 @@ const Chat = () => {
                     type="text"
                     className="border p-2 mr-2 rounded w-[300px]"
                     value={newMessage}
+                    maxLength={500}
                     onChange={(e) => setNewMessage(e.target.value)}
                 />
                 <button
@@ -93,5 +109,6 @@ const Chat = () => {
             </div>
         </div>
     );
-}
+};
+
 export default Chat;
