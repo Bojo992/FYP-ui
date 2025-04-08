@@ -16,7 +16,7 @@ type Message = {
 
 const Chat = () => {
     const connect = new HubConnectionBuilder()
-        .withUrl("http://localhost:5237/hub", {
+        .withUrl("https://test1-bojo-bvg0hehhfqdyauhd.northeurope-01.azurewebsites.net/hub", {
             skipNegotiation: true,
             transport: HttpTransportType.WebSockets  // force WebSocket transport
         })
