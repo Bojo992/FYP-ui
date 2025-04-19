@@ -10,9 +10,11 @@ import ListItemButton from '@mui/material/ListItemButton';
 import DehazeIcon from '@mui/icons-material/Dehaze';
 import AreaChartIcon from '@mui/icons-material/AreaChart';
 import SettingsIcon from '@mui/icons-material/Settings';
+import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import {useRouter} from "next/navigation";
+import {resetConfig} from "@/app/Controllers/LoadBalancerConfigController";
 
 export default function NavBar() {
     const [open, setOpen] = React.useState(false);
@@ -41,6 +43,15 @@ export default function NavBar() {
                             <AreaChartIcon/>
                         </ListItemIcon>
                         <ListItemText primary={"Metrics"}/>
+                    </ListItemButton>
+                </ListItem>
+                <Divider/>
+                <ListItem key={"reset"} disablePadding>
+                    <ListItemButton onClick={() => { resetConfig().then(() => { window.location.reload(); router.push(`/`); }); } } >
+                        <ListItemIcon>
+                            <RotateLeftIcon/>
+                        </ListItemIcon>
+                        <ListItemText primary={"Reset Configuration"}/>
                     </ListItemButton>
                 </ListItem>
                 <Divider/>

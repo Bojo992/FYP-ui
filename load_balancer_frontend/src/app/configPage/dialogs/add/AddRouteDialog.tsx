@@ -5,8 +5,10 @@ import DialogContent from "@mui/material/DialogContent";
 import TextField from "@mui/material/TextField";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import {fetchConfig} from "@/app/Controllers/LoadBalancerConfigController";
+import LBConfigProps from "@/app/util/LBConfigProps";
 
-export default function AddRouteDialog({ handleClickClose, open }: { handleClickClose: () => void, open: boolean }) {
+export default function AddRouteDialog({ handleClickClose, open, configProps }: { handleClickClose: () => void, open: boolean, configProps: LBConfigProps }) {
     return (
         <div>
             <Dialog
@@ -28,17 +30,23 @@ export default function AddRouteDialog({ handleClickClose, open }: { handleClick
                             console.log(JSON.stringify(data));
 
                             try {
-                                const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/add-route', {
+                                await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/add-route', {
                                     method: 'POST',
                                     headers: {
                                         'Content-Type': 'application/json',
                                     },
                                     body: JSON.stringify(data),
-                                });
+                                }).then(async (response) => {
+                                    if (!response.ok) {
+                                        throw new Error('Failed to add direction');
+                                    }
 
-                                if (!response.ok) {
-                                    throw new Error('Failed to add direction');
-                                }
+                                    let config = await fetchConfig() as IConfig;
+
+                                    console.log(JSON.stringify(response.body), config, "bojo");
+
+                                    configProps.setConfig(config);
+                                });
 
                                 console.log('Direction added!');
                                 handleClickClose();

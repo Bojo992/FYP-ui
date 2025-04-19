@@ -6,3 +6,10 @@ export async function fetchConfig() {
     const data = await res.json();
     return data as IConfig;
 }
+
+export async function resetConfig() {
+    const res = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/reset', {method: "GET"});
+    if (!res.ok) {
+        throw new Error(res.json().toString());
+    }
+}

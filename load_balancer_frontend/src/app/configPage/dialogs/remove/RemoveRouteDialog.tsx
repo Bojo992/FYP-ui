@@ -4,11 +4,14 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import {fetchConfig} from "@/app/Controllers/LoadBalancerConfigController";
+import LBConfigProps from "@/app/util/LBConfigProps";
 
-export default function RemoveRouteDialog({handleClose, open, routeName}: {
+export default function RemoveRouteDialog({handleClose, open, routeName, configProps}: {
     handleClose: () => void,
     open: boolean,
-    routeName: string
+    routeName: string,
+    configProps: LBConfigProps
 }) {
     return (
         <Dialog
@@ -21,23 +24,29 @@ export default function RemoveRouteDialog({handleClose, open, routeName}: {
                         event.preventDefault();
 
                         const data = {
-                            clusterId: routeName
+                            routeId: routeName
                         };
 
-                        console.log(JSON.stringify(data));
+                        console.log(JSON.stringify(data), "bojo");
 
                         try {
-                            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/remove-route', {
+                            await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/remove-route', {
                                 method: 'DELETE',
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify(data),
-                            });
+                            }).then(async (response) => {
+                                if (!response.ok) {
+                                    throw new Error('Failed to add direction');
+                                }
 
-                            if (!response.ok) {
-                                throw new Error('Failed to add direction');
-                            }
+                                let config = await fetchConfig() as IConfig;
+
+                                console.log(JSON.stringify(response.body), config, "bojo");
+
+                                configProps.setConfig(config);
+                            });
 
                             // Optionally show success message here
                             console.log('Direction added!');

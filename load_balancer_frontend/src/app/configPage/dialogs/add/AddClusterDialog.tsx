@@ -5,10 +5,13 @@ import DialogContent from "@mui/material/DialogContent";
 import TextField from "@mui/material/TextField";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import {fetchConfig} from "@/app/Controllers/LoadBalancerConfigController";
+import LBConfigProps from "@/app/util/LBConfigProps";
 
-export default function AddClusterDialog({handleClose, open}: {
+export default function AddClusterDialog({handleClose, open, configProps}: {
     handleClose: () => void,
-    open: boolean
+    open: boolean,
+    configProps: LBConfigProps
 }) {
     return (
         <Dialog
@@ -31,17 +34,23 @@ export default function AddClusterDialog({handleClose, open}: {
                         console.log(JSON.stringify(data));
 
                         try {
-                            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/add-cluster', {
+                            await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/add-cluster', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify(data),
-                            });
+                            }).then(async (response) => {
+                                    if (!response.ok) {
+                                        throw new Error('Failed to add direction');
+                                    }
 
-                            if (!response.ok) {
-                                throw new Error('Failed to add direction');
-                            }
+                                    let config = await fetchConfig() as IConfig;
+
+                                    console.log(JSON.stringify(response.body), config, "bojo");
+
+                                    configProps.setConfig(config);
+                                });
 
                             // Optionally show success message here
                             console.log('Direction added!');
