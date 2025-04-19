@@ -181,30 +181,39 @@ export default function Clusters({lb_config}: { lb_config: LBConfigProps }) {
 
             <div>
                 <AddDirectionDialog handleClickClose={handleCloseAddDirectionDialog} open={openAddDirectionDialog}
-                                    clusterId={selectedClusterName}/>
-                <AddClusterDialog handleClose={handleCloseAddClusterDialog} open={openAddClusterDialog}/>
+                                    clusterId={selectedClusterName} configProps={lb_config}/>
+                <AddClusterDialog handleClose={handleCloseAddClusterDialog} open={openAddClusterDialog} configProps={lb_config}/>
 
                 <ChangeDirectionDialog handleClose={handleCloseChangeDirectionDialog} open={openChangeDirectionDialog}
                                        selectedDirection={{
                                            clusterName: selectedClusterName,
                                            directionName: selectedDirectionName,
                                            directionPath: selectedDirectionPath
-                                       }}/>
+                                       }}
+                                       configProps={lb_config}
+                />
 
                 <ChangeLoadBalancingPolicyDialog handleClose={handleCloseChangeLoadBalancingPolicyDialog}
                                                  open={openChangeLoadBalancingPolicyDialog} selectedCluster={{
                     clusterName: selectedClusterName,
                     clusterLoadBalancingPolicy: selectedLoadBalancingPolicy
-                }}/>
+                }}
+                                                 configProps={lb_config}
+
+                />
 
                 <RemoveClusterDialog handleClose={handleCloseRemoveClusterDialog} open={openRemoveClusterDialog}
-                                     clusterName={selectedClusterName}/>
+                                     clusterName={selectedClusterName}
+                                     configProps={lb_config}
+                />
 
                 <RemoveDirectionDialog handleClose={handleCloseRemoveDirectionsDialog} open={openRemoveDirectionDialog}
                                        selectedCluster={{
                                            clusterName: selectedClusterName,
                                            directionName: selectedDirectionName
-                                       }}/>
+                                       }}
+                                       configProps={lb_config}
+                />
             </div>
         </div>
     );

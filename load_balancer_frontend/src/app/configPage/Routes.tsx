@@ -123,10 +123,10 @@ export default function Routes({lb_config}: { lb_config: LBConfigProps }) {
             </Accordion>
 
             <div>
-                <AddRouteDialog handleClickClose={handleCloseAddRouteDialog} open={openAddRouteDialog}/>
-                <ChangeRouteDialog handleClose={handleCloseChangeRouteDialog} open={openChangeRouteDialog} selectedRoute={{routeName: selectedRouteName, routeMatchPath: selectedRoutePath, routeCluster: selectedRouteCluster}} />
+                <AddRouteDialog handleClickClose={handleCloseAddRouteDialog} open={openAddRouteDialog} configProps={lb_config}/>
+                <ChangeRouteDialog handleClose={handleCloseChangeRouteDialog} open={openChangeRouteDialog} selectedRoute={{routeName: selectedRouteName, routeMatchPath: selectedRoutePath, routeCluster: selectedRouteCluster}} configProps={lb_config}/>
                 <RemoveRouteDialog handleClose={handleCloseRemoveRouteDialog} open={openRemoveRouteDialog}
-                                   routeName={selectedRouteName!}/>
+                                   routeName={selectedRouteName!} configProps={lb_config}/>
             </div>
         </div>
     );

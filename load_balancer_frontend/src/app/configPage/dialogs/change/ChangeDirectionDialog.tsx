@@ -5,11 +5,14 @@ import DialogContent from "@mui/material/DialogContent";
 import TextField from "@mui/material/TextField";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import {fetchConfig} from "@/app/Controllers/LoadBalancerConfigController";
+import LBConfigProps from "@/app/util/LBConfigProps";
 
-export default function ChangeDirectionDialog({handleClose, open, selectedDirection}: {
+export default function ChangeDirectionDialog({handleClose, open, selectedDirection, configProps}: {
     handleClose: () => void,
     open: boolean,
     selectedDirection: { clusterName: string, directionName: string, directionPath: string },
+    configProps: LBConfigProps
 }) {
     return (
         <Dialog
@@ -32,17 +35,23 @@ export default function ChangeDirectionDialog({handleClose, open, selectedDirect
                         console.log(JSON.stringify(data));
 
                         try {
-                            const response = await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/update-cluster-directions', {
+                            await fetch(process.env.NEXT_PUBLIC_BASE_URL + '/update-cluster-directions', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify(data),
-                            });
+                            }).then(async (response) => {
+                                    if (!response.ok) {
+                                        throw new Error('Failed to add direction');
+                                    }
 
-                            if (!response.ok) {
-                                throw new Error('Failed to add direction');
-                            }
+                                    let config = await fetchConfig() as IConfig;
+
+                                    console.log(JSON.stringify(response.body), config, "bojo");
+
+                                    configProps.setConfig(config);
+                                });
 
                             console.log('Direction added!');
                             handleClose();
